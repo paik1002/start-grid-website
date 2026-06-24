@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}원고지 — 써내려가는 이야기{% endblock %}
+{% block bodyclass %}page-home{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="hero-eyebrow">매일, 한 칸씩</p>
+  <h1 class="hero-title">
+    <span class="char-box">생</span><span class="char-box">각</span><span class="char-box">을</span>
+    <span class="char-box">글</span><span class="char-box">로</span>
+    <span class="char-box">옮</span><span class="char-box">기</span><span class="char-box">는</span>
+    <span class="char-box">곳</span>
+  </h1>
+  <p class="hero-sub">로그인하고 직접 이야기를 적어보세요. 모든 기록은 차곡차곡 쌓입니다.</p>
+  <div class="hero-actions">
+    <a href="/write" class="btn btn-primary">새 글 쓰기</a>
+    {% if not current_user %}
+    <a href="/signup" class="btn btn-outline">회원가입하기</a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="post-section">
+  <div class="section-head">
+    <h2>전체 글</h2>
+    {% if posts %}
+    <span class="mono dim">총 {{ posts|length }}편</span>
+    {% endif %}
+  </div>
+
+  {% if posts %}
+  <div class="post-grid">
+    {% for post in posts %}
+    <a class="post-card" href="/post/{{ post.id }}" style="--delay: {{ loop.index0 % 6 }}">
+      <span class="post-card-fold" aria-hidden="true"></span>
+      <h3 class="post-card-title">{{ post.title or "제목 없음" }}</h3>
+      <p class="post-card-excerpt">{{ post.content[:90] }}{% if post.content and post.content|length > 90 %}…{% endif %}</p>
+      <div class="post-card-meta mono">
+        <span>{{ post.author_name or "익명" }}</span>
+        <span>{{ post.created_at_display }}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">
+    <svg viewBox="0 0 64 64" width="48" height="48" aria-hidden="true">
+      <rect x="6" y="6" width="52" height="52" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+      <path d="M20 44 L44 20" stroke="var(--red)" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    아직 채워진 칸이 없어요. 첫 글을 적어보세요.
+  </p>
+  {% endif %}
+</section>
+{% endblock %}

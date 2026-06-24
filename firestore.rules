@@ -1,0 +1,19 @@
+// 참고: 이 앱은 Firebase Admin SDK(serviceAccountKey.json)로만 Firestore에
+// 접근하기 때문에 서버 코드는 이 규칙과 무관하게 항상 전체 권한으로 동작해요.
+// 아래 규칙은 혹시 나중에 클라이언트(웹/모바일) SDK를 추가로 붙이는 경우를
+// 대비한 참고용입니다. 지금 구성 그대로 쓴다면 적용하지 않아도 됩니다.
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow write: if false; // Admin SDK(서버)만 직접 씁니다.
+    }
+
+    match /users/{userId} {
+      allow read, write: if false; // Admin SDK(서버)만 직접 씁니다.
+    }
+  }
+}

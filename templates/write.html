@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}글쓰기 — 원고지{% endblock %}
+{% block bodyclass %}page-write{% endblock %}
+
+{% block content %}
+{% if logged_in %}
+<section class="write-section">
+  <div class="section-head">
+    <h2>새 글 쓰기</h2>
+    <span class="mono dim" id="char-count">0자</span>
+  </div>
+
+  <form method="POST" action="{{ url_for('write') }}" class="write-card" novalidate>
+    <label class="field">
+      <span>제목</span>
+      <input type="text" name="title" maxlength="80" required value="{{ form.title or '' }}" placeholder="제목을 입력하세요" />
+    </label>
+
+    <label class="field">
+      <span>본문</span>
+      <textarea id="content" name="content" rows="14" required placeholder="원고지 한 칸씩, 천천히 적어보세요.">{{ form.content or '' }}</textarea>
+    </label>
+
+    {% if error %}
+    <p class="form-error" role="alert">{{ error }}</p>
+    {% endif %}
+
+    <div class="write-actions">
+      <a href="/" class="btn btn-outline">취소</a>
+      <button type="submit" class="btn btn-primary">발행하기</button>
+    </div>
+  </form>
+</section>
+{% else %}
+<section class="auth-required">
+  <svg viewBox="0 0 64 64" width="52" height="52" aria-hidden="true">
+    <rect x="6" y="6" width="52" height="52" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path d="M22 32h20M32 22v20" stroke="var(--red)" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>
+  <h2>로그인이 필요해요</h2>
+  <p>글을 쓰려면 먼저 로그인해주세요.</p>
+  <a href="/login?next=/write" class="btn btn-primary">로그인하러 가기</a>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const contentEl = document.getElementById("content");
+  const countEl = document.getElementById("char-count");
+  if (contentEl && countEl) {
+    const update = () => { countEl.textContent = `${contentEl.value.length}자`; };
+    contentEl.addEventListener("input", update);
+    update();
+  }
+</script>
+{% endblock %}
