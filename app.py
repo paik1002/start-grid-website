@@ -1,8 +1,8 @@
 """
 원고지 (Manuscript) — a tiny blog
 Everything runs on the server. The ONLY Firebase credential this app needs
-is `serviceAccountKey.json` (Firebase Admin SDK). There is no Firebase Web
-API key, no client-side Firebase SDK, nothing else to set up in Firebase.
+is the FIREBASE_SERVICE_ACCOUNT_JSON environment variable (Firebase Admin SDK).
+There is no Firebase Web API key, no client-side Firebase SDK, nothing else to set up in Firebase.
 
 - Firestore (via the service account) stores `users` and `posts`.
 - Login state is a normal signed Flask session cookie.
@@ -18,35 +18,21 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVICE_ACCOUNT_PATH = os.path.join(BASE_DIR, "serviceAccountKey.json")
-
 USERS_COLLECTION = "users"
 POSTS_COLLECTION = "posts"
 
 
 def _init_firebase():
-    """Initialize firebase_admin exactly once, using serviceAccountKey.json.
-
-    Local / most hosts: drop serviceAccountKey.json next to app.py.
-    Serverless hosts where you can't ship the file (e.g. Vercel) may instead
-    set the env var FIREBASE_SERVICE_ACCOUNT_JSON to the *contents* of that
-    same file. Either way, it's the one and only credential this app uses.
-    """
     if firebase_admin._apps:
         return
 
-    if os.path.exists(SERVICE_ACCOUNT_PATH):
-        cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
-    elif os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON"):
+    if os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON"):
         cred = credentials.Certificate(
             json.loads(os.environ["FIREBASE_SERVICE_ACCOUNT_JSON"])
         )
     else:
         raise RuntimeError(
-            "serviceAccountKey.json을 app.py와 같은 폴더에 넣어주세요. "
-            "(서버리스 배포라면 FIREBASE_SERVICE_ACCOUNT_JSON 환경변수에 "
-            "그 파일 내용을 그대로 넣어도 됩니다.)"
+            "FIREBASE_SERVICE_ACCOUNT_JSON 환경변수를 설정해주세요."
         )
 
     firebase_admin.initialize_app(cred)
@@ -81,9 +67,6 @@ def inject_current_user():
     return {"current_user": None}
 
 
-# ---------------------------------------------------------------------------
-# Pages
-# ---------------------------------------------------------------------------
 @app.route("/")
 def index():
     docs = (
@@ -224,6 +207,5 @@ def post_detail(post_id):
     return render_template("post.html", post=data)
 
 
-# Vercel's Python runtime looks for a WSGI callable named `app`.
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
